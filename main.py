@@ -30,29 +30,20 @@ def parse_data(data):
 def send_user_details(chat_id, user):
     user_details = f"New user started ChatBot:\n\nUsername: @{user.username}\nFirst Name: {user.first_name}\nLast Name: {user.last_name}\nUser ID: {user.id}"
     bot.send_message(chat_id, user_details)
-    
-user_states = {}
 
 @bot.message_handler(commands=['start'])
 def start(message):
-    if message.chat.id in user_states and user_states[message.chat.id] == 'creating_quiz':
-        bot.send_message(message.chat.id, "لقد ضغطت بالفعل علي هذا الزر، فقط قم بأكمال الخطوات🥰")
-    else:
-        markup = telebot.types.InlineKeyboardMarkup()
-        markup.row_width = 2  # Set row width to 2 for two buttons in each row
-        markup.add(telebot.types.InlineKeyboardButton("أنشاء اختبار🫣", callback_data="start_quiz"),
-                   telebot.types.InlineKeyboardButton("تواصل📞", url="https://t.me/RefOoSami"))
-        bot.send_message(message.chat.id, "اهلا بيك\ي👋😍\nاضغط/ي علي 'انشاء اختبار' للبدء😋", reply_markup=markup)
+    markup = telebot.types.InlineKeyboardMarkup()
+    markup.row_width = 2  # Set row width to 2 for two buttons in each row
+    markup.add(telebot.types.InlineKeyboardButton("أنشاء اختبار🫣", callback_data="start_quiz"),
+                telebot.types.InlineKeyboardButton("تواصل📞", url="https://t.me/RefOoSami"))
+    bot.send_message(message.chat.id, "اهلا بيك\ي👋😍\nاضغط/ي علي 'انشاء اختبار' للبدء😋", reply_markup=markup)
     send_user_details(854578633, message.from_user)
 @bot.callback_query_handler(func=lambda call: call.data == "start_quiz")
 def start_quiz(call):
     chat_id = call.message.chat.id
-    if chat_id in user_states and user_states[chat_id] == 'creating_quiz':
-        bot.send_message(chat_id, "لقد ضغطت بالفعل علي هذا الزر، فقط قم بأكمال الخطوات🥰")
-    else:
-        user_states[chat_id] = 'creating_quiz'
-        bot.send_message(chat_id, "برجاء ارسال موضوع المحاضرة في رسالة🤖")
-        bot.register_next_step_handler(call.message, get_topic)
+    bot.send_message(chat_id, "برجاء ارسال موضوع المحاضرة في رسالة🤖")
+    bot.register_next_step_handler(call.message, get_topic)
 
 def get_topic(message):
     topic = message.text
